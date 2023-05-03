@@ -1,102 +1,126 @@
 import { Input } from '@/components'
-import { getUser } from '@/services/github'
+import { mask } from '@/helpers/mask'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { GetStaticProps, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import Image from 'next/image'
-import Link from 'next/link'
-import { CircleNotch, X } from 'phosphor-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { useQuery } from 'react-query'
 import { z } from 'zod'
 
-const createUserFormSchema = z.object({
-  username: z
+const createBadgeFormSchema = z.object({
+  label: z.string().transform((username) => username.replace(' ', '%20')),
+  labelColor: z
     .string()
-    .min(3, 'minLength')
-    .transform((username) => username.trim().replace(/\s/g, '')),
+    .min(7, 'minLength')
+    .max(7, 'maxLength')
+    .regex(/^#[0-9A-F]{6}$/i, 'invalid'),
+
+  desc: z.string().transform((username) => username.replace(' ', '%20')),
+  descColor: z
+    .string()
+    .min(7, 'minLength')
+    .regex(/^#[0-9A-F]{6}$/i, 'invalid'),
+
+  logo: z.string(),
+  logoColor: z
+    .string()
+    .min(7, 'minLength')
+    .regex(/^#[0-9A-F]{6}$/i, 'invalid'),
+  style: z.string(),
 })
 
-type UserFormProps = z.infer<typeof createUserFormSchema>
+type BadgeFormProps = z.infer<typeof createBadgeFormSchema>
 
 const HomePage: NextPage = ({}) => {
   const { t } = useTranslation('common')
   const { t: tForm } = useTranslation('form')
-  const [search, setSearch] = useState('')
+  const [badgeJson, setBadgeJson] = useState<BadgeFormProps>()
 
   const {
     handleSubmit,
     register,
-    // watch,
+    watch,
     formState: { errors },
-  } = useForm<UserFormProps>({
-    resolver: zodResolver(createUserFormSchema),
-    defaultValues: {
-      username: 'YaGRRusso',
-    },
+  } = useForm<BadgeFormProps>({
+    resolver: zodResolver(createBadgeFormSchema),
   })
 
-  const { data: githubUser, isLoading: isGithubUserLoading } = useQuery(
-    ['user', search],
-    () => {
-      if (search) return getUser(search)
-    },
-    {
-      refetchOnWindowFocus: false,
-      cacheTime: 60000,
-    }
-  )
-
-  const onSubmit: SubmitHandler<UserFormProps> = ({ username }) => {
-    setSearch(username)
-    console.log(username)
+  const onSubmit: SubmitHandler<BadgeFormProps> = (data) => {
+    setBadgeJson(data)
   }
+
+  const badgeUrl = useMemo(() => {
+    if (badgeJson) {
+      const { label, labelColor, desc, descColor, logo, logoColor, style } =
+        badgeJson
+
+      return `${label}-${desc}-${descColor}?logo-${logo}&logoColor=${logoColor}&labelColor-${labelColor}&style=${style}`
+    }
+  }, [badgeJson])
 
   return (
     <div className="container-center container">
       <div className="flex flex-col items-center justify-center gap-6">
-        {githubUser?.avatar_url && (
-          <Link href={githubUser.html_url} target="_blank">
-            <Image
-              alt="user"
-              src={githubUser.avatar_url}
-              width={128}
-              height={128}
-              className="rounded-xl border border-gray-500 transition-all hover:border-gray-400 active:scale-95"
-            />
-          </Link>
-        )}
+        {badgeUrl && <h1>{badgeUrl}</h1>}
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="flex-1 text-3xl">
-            {t('hello', { name: githubUser?.name })}
-          </h1>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <Input
+              placeholder="label"
+              type="text"
+              error={tForm(errors.label?.message as string)}
+              {...register('label')}
+            />
+            <Input
+              placeholder="labelColor"
+              type="text"
+              error={tForm(errors.labelColor?.message as string)}
+              value={mask(watch('labelColor'), '#******')}
+              maxLength={7}
+              {...register('labelColor')}
+            />
 
-          {!githubUser?.name && (
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <Input
-                placeholder="Username"
-                type="text"
-                error={tForm(errors.username?.message as string)}
-                // value={mask(watch('username'), [
-                //   '000.000.000-00',
-                //   '000.000.000/0000-00',
-                // ])}
-                {...register('username')}
-              />
-            </form>
-          )}
+            <Input
+              placeholder="desc"
+              type="text"
+              error={tForm(errors.desc?.message as string)}
+              {...register('desc')}
+            />
+            <Input
+              placeholder="descColor"
+              type="text"
+              error={tForm(errors.descColor?.message as string)}
+              value={mask(watch('descColor'), '#******')}
+              maxLength={7}
+              {...register('descColor')}
+            />
 
-          {isGithubUserLoading && <CircleNotch className="animate-spin" />}
-          {githubUser?.name && githubUser?.html_url && (
-            <button
-              className="text-gray-500 transition-colors hover:text-gray-400"
-              onClick={() => setSearch('')}
-            >
-              <X />
-            </button>
-          )}
+            <Input
+              placeholder="logo"
+              type="text"
+              error={tForm(errors.logo?.message as string)}
+              {...register('logo')}
+            />
+            <Input
+              placeholder="logoColor"
+              type="text"
+              error={tForm(errors.logoColor?.message as string)}
+              value={mask(watch('logoColor'), '#******')}
+              maxLength={7}
+              {...register('logoColor')}
+            />
+            <Input
+              placeholder="style"
+              type="text"
+              error={tForm(errors.style?.message as string)}
+              {...register('style')}
+            />
+            <pre>{JSON.stringify(badgeJson, null, 2)}</pre>
+            <button type="submit"></button>
+          </form>
         </div>
       </div>
     </div>

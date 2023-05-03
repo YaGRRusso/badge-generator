@@ -1,4 +1,5 @@
 {
   "required": "Campo obrigatório",
-  "minLength": "Muito curto"
+  "minLength": "Muito curto",
+  "invalid": "Valor inválido"
 }

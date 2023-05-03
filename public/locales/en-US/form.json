@@ -1,4 +1,5 @@
 {
   "required": "Required field",
-  "minLength": "Very short"
+  "minLength": "Very short",
+  "invalid": "Invalid value"
 }
