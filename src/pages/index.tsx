@@ -1,9 +1,9 @@
 import { Input } from '@/components'
-import { mask } from '@/helpers/mask'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { GetStaticProps, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import { Copy, PaperPlaneRight } from 'phosphor-react'
 import { useMemo, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -13,20 +13,22 @@ const createBadgeFormSchema = z.object({
   labelColor: z
     .string()
     .min(7, 'minLength')
-    .max(7, 'maxLength')
-    .regex(/^#[0-9A-F]{6}$/i, 'invalid'),
+    .regex(/^#[0-9A-F]{6}$/i, 'invalid')
+    .transform((data) => data.replace('#', '')),
 
   desc: z.string().transform((username) => username.replace(' ', '%20')),
   descColor: z
     .string()
     .min(7, 'minLength')
-    .regex(/^#[0-9A-F]{6}$/i, 'invalid'),
+    .regex(/^#[0-9A-F]{6}$/i, 'invalid')
+    .transform((data) => data.replace('#', '')),
 
   logo: z.string(),
   logoColor: z
     .string()
     .min(7, 'minLength')
-    .regex(/^#[0-9A-F]{6}$/i, 'invalid'),
+    .regex(/^#[0-9A-F]{6}$/i, 'invalid')
+    .transform((data) => data.replace('#', '')),
   style: z.string(),
 })
 
@@ -40,10 +42,12 @@ const HomePage: NextPage = ({}) => {
   const {
     handleSubmit,
     register,
-    watch,
     formState: { errors },
   } = useForm<BadgeFormProps>({
     resolver: zodResolver(createBadgeFormSchema),
+    defaultValues: {
+      style: 'flat-square',
+    },
   })
 
   const onSubmit: SubmitHandler<BadgeFormProps> = (data) => {
@@ -55,73 +59,96 @@ const HomePage: NextPage = ({}) => {
       const { label, labelColor, desc, descColor, logo, logoColor, style } =
         badgeJson
 
-      return `${label}-${desc}-${descColor}?logo-${logo}&logoColor=${logoColor}&labelColor-${labelColor}&style=${style}`
+      return `https://shields.io/badge/${label}-${desc}-${descColor}?logo=${logo}&logoColor=${logoColor}&labelColor=${labelColor}&style=${style}`
     }
   }, [badgeJson])
 
   return (
     <div className="container-center container">
-      <div className="flex flex-col items-center justify-center gap-6">
-        {badgeUrl && <h1>{badgeUrl}</h1>}
-        <div className="flex flex-wrap items-center gap-2">
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col gap-4"
-          >
+      <div className="flex flex-col items-center justify-center gap-12">
+        {badgeUrl && (
+          <div className="flex items-center gap-2">
+            <button className="flex items-center justify-center rounded border border-slate-800 bg-slate-800 p-1 transition-colors hover:bg-slate-900">
+              <Copy />
+            </button>
+            {/* <Image src={badgeUrl} alt="badge" width={200} height={60} /> */}
+            <img src={badgeUrl} alt="badge" className="h-12" />
+          </div>
+        )}
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex w-full max-w-md flex-col gap-4"
+        >
+          <div className="flex items-stretch gap-4">
             <Input
-              placeholder="label"
+              placeholder="Label"
               type="text"
+              full
               error={tForm(errors.label?.message as string)}
               {...register('label')}
             />
             <Input
-              placeholder="labelColor"
-              type="text"
+              type="color"
+              full={false}
               error={tForm(errors.labelColor?.message as string)}
-              value={mask(watch('labelColor'), '#******')}
-              maxLength={7}
+              className="!w-10 !p-1.5"
               {...register('labelColor')}
             />
-
+          </div>
+          <div className="flex items-stretch gap-4">
             <Input
-              placeholder="desc"
+              placeholder="Desc"
               type="text"
+              full
               error={tForm(errors.desc?.message as string)}
               {...register('desc')}
             />
             <Input
-              placeholder="descColor"
-              type="text"
+              type="color"
               error={tForm(errors.descColor?.message as string)}
-              value={mask(watch('descColor'), '#******')}
-              maxLength={7}
+              className="!w-10 !p-1.5"
               {...register('descColor')}
             />
-
+          </div>
+          <div className="flex items-stretch gap-4">
             <Input
-              placeholder="logo"
+              placeholder="Logo"
               type="text"
+              full
               error={tForm(errors.logo?.message as string)}
               {...register('logo')}
             />
             <Input
-              placeholder="logoColor"
-              type="text"
+              type="color"
               error={tForm(errors.logoColor?.message as string)}
-              value={mask(watch('logoColor'), '#******')}
-              maxLength={7}
+              className="!w-10 !p-1.5"
               {...register('logoColor')}
             />
-            <Input
-              placeholder="style"
-              type="text"
-              error={tForm(errors.style?.message as string)}
-              {...register('style')}
-            />
-            <pre>{JSON.stringify(badgeJson, null, 2)}</pre>
-            <button type="submit"></button>
-          </form>
-        </div>
+          </div>
+          <select
+            {...register('style')}
+            className="rounded bg-slate-800 p-2 text-slate-200"
+          >
+            <option value="plastic">Plastic</option>
+            <option value="flat">Flat</option>
+            <option value="flat-square">Flat-Square</option>
+            <option value="for-the-badge">For-The-Badge</option>
+          </select>
+          <button
+            className="flex items-center justify-center gap-2 rounded border border-slate-800 bg-slate-800 p-1 px-6 py-4 text-lg text-slate-200 transition-colors hover:bg-slate-900"
+            type="submit"
+          >
+            Criar
+            <PaperPlaneRight />
+          </button>
+        </form>
+
+        {badgeJson && (
+          <pre className="scrollbar-hidden max-h-64 w-full max-w-md overflow-auto rounded-md bg-slate-950 p-4 text-xs">
+            {JSON.stringify(badgeJson, null, 2)}
+          </pre>
+        )}
       </div>
     </div>
   )

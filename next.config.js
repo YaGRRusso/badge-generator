@@ -5,7 +5,7 @@ const nextConfig = {
   reactStrictMode: false,
   i18n,
   images: {
-    domains: ['avatars.githubusercontent.com'],
+    domains: ['shields.io', 'img.shields.io'],
   },
 }
 
