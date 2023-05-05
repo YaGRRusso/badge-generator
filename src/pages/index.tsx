@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { GetStaticProps, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { Copy, PaperPlaneRight } from 'phosphor-react'
+import { Copy, FloppyDisk, PaperPlaneRight } from 'phosphor-react'
 import { useMemo, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -38,6 +38,7 @@ const HomePage: NextPage = ({}) => {
   const { t } = useTranslation('common')
   const { t: tForm } = useTranslation('form')
   const [badgeJson, setBadgeJson] = useState<BadgeFormProps>()
+  const [badgesList, setBadgesList] = useState<string[]>([])
 
   const {
     handleSubmit,
@@ -68,16 +69,22 @@ const HomePage: NextPage = ({}) => {
       <div className="flex flex-col items-center justify-center gap-12">
         {badgeUrl && (
           <div className="flex items-center gap-2">
-            <button
-              className="flex items-center justify-center rounded bg-gray-200  p-1 transition-colors hover:bg-gray-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            <Button
+              size="xs"
               onClick={() => {
                 navigator.clipboard.writeText(badgeUrl)
               }}
             >
               <Copy />
-            </button>
-            {/* <Image src={badgeUrl} alt="badge" width={200} height={60} /> */}
+            </Button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={badgeUrl} alt="badge" className="h-12" />
+            <Button
+              size="xs"
+              onClick={() => setBadgesList([...badgesList, badgeUrl])}
+            >
+              <FloppyDisk />
+            </Button>
           </div>
         )}
 
@@ -135,8 +142,8 @@ const HomePage: NextPage = ({}) => {
             options={[
               { label: 'Plastic', value: 'plastic' },
               { label: 'Flat', value: 'flat' },
-              { label: 'Flat-Square', value: 'flat-square' },
-              { label: 'For-The-Badge', value: 'for-the-badge' },
+              { label: 'Flat Square', value: 'flat-square' },
+              { label: 'For the Badge', value: 'for-the-badge' },
             ]}
           />
           <Button>
@@ -145,13 +152,31 @@ const HomePage: NextPage = ({}) => {
           </Button>
         </form>
 
-        {badgeJson && (
-          <pre className="scrollbar-hidden max-h-64 w-full  max-w-md overflow-auto rounded-md bg-gray-300 p-4 text-xs dark:bg-slate-950">
+        {/* {badgeJson && (
+          <pre className="scrollbar-hidden max-h-64 w-full max-w-md overflow-auto rounded-md bg-gray-300 p-4 text-xs dark:bg-slate-950">
             {badgeUrl}
             <br />
             <br />
             {JSON.stringify(badgeJson, null, 2)}
           </pre>
+        )} */}
+
+        {badgesList.length > 0 && (
+          <div className="flex w-full max-w-2xl flex-wrap items-center justify-center gap-2">
+            {badgesList.map((item, index) => (
+              <Button
+                key={index}
+                size="xs"
+                variant="light"
+                onClick={() => {
+                  navigator.clipboard.writeText(item)
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={item} alt="badge" />
+              </Button>
+            ))}
+          </div>
         )}
       </div>
     </div>
