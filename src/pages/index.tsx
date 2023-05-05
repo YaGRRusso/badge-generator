@@ -75,8 +75,7 @@ const HomePage: NextPage = ({}) => {
   )
 
   const logoInputValue = useMemo(() => {
-    if (lockLogo === 'label') return watch('label')
-    if (lockLogo === 'desc') return watch('desc')
+    if (lockLogo) return watch(lockLogo)
     return watch('logo')
   }, [lockLogo, watch('label'), watch('desc'), watch('logo')])
 
@@ -85,7 +84,9 @@ const HomePage: NextPage = ({}) => {
       const { label, labelColor, desc, descColor, logo, logoColor, style } =
         badgeJson
 
-      return `https://shields.io/badge/${label}-${desc}-${descColor}?logo=${logo}&logoColor=${logoColor}&labelColor=${labelColor}&style=${style}`
+      return `https://shields.io/badge/${label}-${desc}-${descColor}?logo=${
+        lockLogo ? logoInputValue : logo
+      }&logoColor=${logoColor}&labelColor=${labelColor}&style=${style}`
     }
   }, [badgeJson])
 
@@ -228,14 +229,14 @@ const HomePage: NextPage = ({}) => {
           </XarrowContainer>
         </form>
 
-        {/* {badgeJson && (
+        {badgeJson && (
           <pre className="scrollbar-hidden max-h-64 w-full max-w-md overflow-auto rounded-md bg-gray-300 p-4 text-xs dark:bg-slate-950">
             {badgeUrl}
             <br />
             <br />
             {JSON.stringify(badgeJson, null, 2)}
           </pre>
-        )} */}
+        )}
 
         {badgesList.length > 0 && (
           <div className="flex w-full max-w-2xl flex-wrap items-center justify-center gap-2">
