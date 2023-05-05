@@ -9,11 +9,12 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 const Select = forwardRef<any, SelectProps>(
-  ({ options, children, className, ...rest }, ref) => {
+  ({ options, disabled, children, className, ...rest }, ref) => {
     return (
       <select
         className={clsx(
-          'rounded bg-gray-200 p-2 hover:bg-gray-300 dark:bg-slate-800 dark:text-slate-200',
+          'cursor-pointer rounded bg-gray-200 p-2 hover:bg-gray-300 dark:bg-slate-800 dark:text-slate-200',
+          disabled && 'pointer-events-none opacity-50',
           className
         )}
         ref={ref}

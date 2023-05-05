@@ -1,10 +1,16 @@
-import { Button, Input, Select } from '@/components'
+import { Button, Input, Select, XarrowContainer } from '@/components'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { GetStaticProps, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
-import { Copy, FloppyDisk, PaperPlaneRight } from 'phosphor-react'
-import { useMemo, useState } from 'react'
+import {
+  Copy,
+  FloppyDisk,
+  Lock,
+  LockOpen,
+  PaperPlaneRight,
+} from 'phosphor-react'
+import { useCallback, useMemo, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -39,10 +45,12 @@ const HomePage: NextPage = ({}) => {
   const { t: tForm } = useTranslation('form')
   const [badgeJson, setBadgeJson] = useState<BadgeFormProps>()
   const [badgesList, setBadgesList] = useState<string[]>([])
+  const [lockLogo, setLockLogo] = useState<'label' | 'desc'>()
 
   const {
     handleSubmit,
     register,
+    watch,
     formState: { errors },
   } = useForm<BadgeFormProps>({
     resolver: zodResolver(createBadgeFormSchema),
@@ -54,6 +62,23 @@ const HomePage: NextPage = ({}) => {
   const onSubmit: SubmitHandler<BadgeFormProps> = (data) => {
     setBadgeJson(data)
   }
+
+  const toggleLockLogo = useCallback(
+    (data: 'label' | 'desc') => {
+      if (lockLogo === data) {
+        setLockLogo(undefined)
+      } else {
+        setLockLogo(data)
+      }
+    },
+    [lockLogo]
+  )
+
+  const logoInputValue = useMemo(() => {
+    if (lockLogo === 'label') return watch('label')
+    if (lockLogo === 'desc') return watch('desc')
+    return watch('logo')
+  }, [lockLogo, watch('label'), watch('desc'), watch('logo')])
 
   const badgeUrl = useMemo(() => {
     if (badgeJson) {
@@ -92,64 +117,115 @@ const HomePage: NextPage = ({}) => {
           onSubmit={handleSubmit(onSubmit)}
           className="flex w-full max-w-md flex-col gap-4"
         >
-          <div className="flex items-stretch gap-4">
-            <Input
-              placeholder="Label"
-              type="text"
-              error={tForm(errors.label?.message as string)}
-              full
-              {...register('label')}
-            />
-            <Input
-              type="color"
-              error={tForm(errors.labelColor?.message as string)}
-              className="!w-10 !p-1.5"
-              {...register('labelColor')}
-            />
-          </div>
-          <div className="flex items-stretch gap-4">
-            <Input
-              placeholder="Desc"
-              type="text"
-              error={tForm(errors.desc?.message as string)}
-              full
-              {...register('desc')}
-            />
-            <Input
-              type="color"
-              error={tForm(errors.descColor?.message as string)}
-              className="!w-10 !p-1.5"
-              {...register('descColor')}
-            />
-          </div>
-          <div className="flex items-stretch gap-4">
-            <Input
-              placeholder="Logo"
-              type="text"
-              error={tForm(errors.logo?.message as string)}
-              full
-              {...register('logo')}
-            />
-            <Input
-              type="color"
-              error={tForm(errors.logoColor?.message as string)}
-              className="!w-10 !p-1.5"
-              {...register('logoColor')}
-            />
-          </div>
-          <Select
-            {...register('style')}
-            options={[
-              { label: 'Plastic', value: 'plastic' },
-              { label: 'Flat', value: 'flat' },
-              { label: 'Flat Square', value: 'flat-square' },
-              { label: 'For the Badge', value: 'for-the-badge' },
+          <XarrowContainer
+            xarrows={[
+              {
+                start: 'labelLock',
+                end: 'labelInput',
+                color: lockLogo === 'label' ? '#777' : '#77777740',
+              },
+              {
+                start: 'labelLock',
+                end: 'logoInput',
+                color: lockLogo === 'label' ? '#777' : '#77777740',
+              },
+              {
+                start: 'descLock',
+                end: 'descColorInput',
+                color: lockLogo === 'desc' ? '#777' : '#77777740',
+              },
+              {
+                start: 'descLock',
+                startAnchor: 'bottom',
+                end: 'logoColorInput',
+                color: lockLogo === 'desc' ? '#777' : '#77777740',
+                endAnchor: 'right',
+              },
             ]}
-          />
-          <Button>
-            {t('create')}
-            <PaperPlaneRight />
-          </Button>
+          >
+            <div className="relative flex items-center gap-4">
+              <Button
+                size="xs"
+                className="absolute -left-12"
+                id="labelLock"
+                variant="light"
+                onClick={() => toggleLockLogo('label')}
+              >
+                {lockLogo === 'label' ? <Lock /> : <LockOpen />}
+              </Button>
+              <Input
+                placeholder="Label"
+                type="text"
+                error={tForm(errors.label?.message as string)}
+                full
+                id="labelInput"
+                {...register('label')}
+              />
+              <Input
+                type="color"
+                error={tForm(errors.labelColor?.message as string)}
+                className="!w-10 !p-1.5"
+                {...register('labelColor')}
+              />
+            </div>
+            <div className="relative flex items-center gap-4">
+              <Button
+                size="xs"
+                className="absolute -right-12"
+                id="descLock"
+                variant="light"
+                onClick={() => toggleLockLogo('desc')}
+              >
+                {lockLogo === 'desc' ? <Lock /> : <LockOpen />}
+              </Button>
+              <Input
+                placeholder="Desc"
+                type="text"
+                error={tForm(errors.desc?.message as string)}
+                full
+                {...register('desc')}
+              />
+              <Input
+                type="color"
+                error={tForm(errors.descColor?.message as string)}
+                className="!w-10 !p-1.5"
+                id="descColorInput"
+                {...register('descColor')}
+              />
+            </div>
+            <div className="flex items-stretch gap-4">
+              <Input
+                placeholder="Logo"
+                type="text"
+                error={tForm(errors.logo?.message as string)}
+                full
+                id="logoInput"
+                value={logoInputValue}
+                disabled={!!lockLogo}
+                {...register('logo')}
+              />
+              <Input
+                type="color"
+                error={tForm(errors.logoColor?.message as string)}
+                className="!w-10 !p-1.5"
+                id="logoColorInput"
+                {...register('logoColor')}
+              />
+            </div>
+            <Select
+              {...register('style')}
+              options={[
+                { label: 'Plastic', value: 'plastic' },
+                { label: 'Flat', value: 'flat' },
+                { label: 'Flat Square', value: 'flat-square' },
+                { label: 'For the Badge', value: 'for-the-badge' },
+              ]}
+            />
+            <Button type="submit">
+              {t('create')}
+              <PaperPlaneRight />
+            </Button>
+          </XarrowContainer>
         </form>
 
         {/* {badgeJson && (

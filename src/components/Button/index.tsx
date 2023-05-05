@@ -24,6 +24,7 @@ const Button: FC<ButtonProps> = ({
   size = 'md',
   variant = 'default',
   children,
+  disabled,
   className,
   ...rest
 }) => {
@@ -35,9 +36,10 @@ const Button: FC<ButtonProps> = ({
         'flex items-center justify-center gap-2 rounded text-lg transition-colors',
         buttonSizeVariants[size],
         buttonVariantVariants[variant],
+        disabled && 'pointer-events-none opacity-50',
         className
       )}
-      type="submit"
+      type="button"
       {...rest}
     >
       {children}

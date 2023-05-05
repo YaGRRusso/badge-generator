@@ -9,3 +9,6 @@ export type { ButtonProps } from './Button'
 
 export { default as Select } from './Select'
 export type { SelectProps } from './Select'
+
+export { default as XarrowContainer } from './XarrowContainer'
+export type { XarrowContainerProps } from './XarrowContainer'
