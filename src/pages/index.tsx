@@ -46,6 +46,7 @@ const HomePage: NextPage = ({}) => {
   const [badgeJson, setBadgeJson] = useState<BadgeFormProps>()
   const [badgesList, setBadgesList] = useState<string[]>([])
   const [lockLogo, setLockLogo] = useState<'label' | 'desc'>()
+  const [isShowingInfo, setIsShowingInfo] = useState(false)
 
   const {
     handleSubmit,
@@ -77,6 +78,7 @@ const HomePage: NextPage = ({}) => {
   const logoInputValue = useMemo(() => {
     if (lockLogo) return watch(lockLogo)
     return watch('logo')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lockLogo, watch('label'), watch('desc'), watch('logo')])
 
   const badgeUrl = useMemo(() => {
@@ -88,6 +90,7 @@ const HomePage: NextPage = ({}) => {
         lockLogo ? logoInputValue : logo
       }&logoColor=${logoColor}&labelColor=${labelColor}&style=${style}`
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [badgeJson])
 
   return (
@@ -104,7 +107,12 @@ const HomePage: NextPage = ({}) => {
               <Copy />
             </Button>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={badgeUrl} alt="badge" className="h-12" />
+            <img
+              src={badgeUrl}
+              alt="badge"
+              className="h-12"
+              onClick={() => setIsShowingInfo(!isShowingInfo)}
+            />
             <Button
               size="xs"
               onClick={() => setBadgesList([...badgesList, badgeUrl])}
@@ -139,8 +147,8 @@ const HomePage: NextPage = ({}) => {
                 start: 'descLock',
                 startAnchor: 'bottom',
                 end: 'logoColorInput',
-                color: lockLogo === 'desc' ? '#777' : '#77777740',
                 endAnchor: 'right',
+                color: lockLogo === 'desc' ? '#777' : '#77777740',
               },
             ]}
           >
@@ -229,7 +237,7 @@ const HomePage: NextPage = ({}) => {
           </XarrowContainer>
         </form>
 
-        {badgeJson && (
+        {badgeJson && isShowingInfo && (
           <pre className="scrollbar-hidden max-h-64 w-full max-w-md overflow-auto rounded-md bg-gray-300 p-4 text-xs dark:bg-slate-950">
             {badgeUrl}
             <br />
