@@ -1,4 +1,4 @@
-import { Input } from '@/components'
+import { Button, Input, Select } from '@/components'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { GetStaticProps, NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
@@ -46,7 +46,7 @@ const HomePage: NextPage = ({}) => {
   } = useForm<BadgeFormProps>({
     resolver: zodResolver(createBadgeFormSchema),
     defaultValues: {
-      style: 'flat-square',
+      style: 'plastic',
     },
   })
 
@@ -68,7 +68,12 @@ const HomePage: NextPage = ({}) => {
       <div className="flex flex-col items-center justify-center gap-12">
         {badgeUrl && (
           <div className="flex items-center gap-2">
-            <button className="flex items-center justify-center rounded border border-slate-800 bg-slate-800 p-1 transition-colors hover:bg-slate-900">
+            <button
+              className="flex items-center justify-center rounded bg-gray-200  p-1 transition-colors hover:bg-gray-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              onClick={() => {
+                navigator.clipboard.writeText(badgeUrl)
+              }}
+            >
               <Copy />
             </button>
             {/* <Image src={badgeUrl} alt="badge" width={200} height={60} /> */}
@@ -84,13 +89,12 @@ const HomePage: NextPage = ({}) => {
             <Input
               placeholder="Label"
               type="text"
-              full
               error={tForm(errors.label?.message as string)}
+              full
               {...register('label')}
             />
             <Input
               type="color"
-              full={false}
               error={tForm(errors.labelColor?.message as string)}
               className="!w-10 !p-1.5"
               {...register('labelColor')}
@@ -100,8 +104,8 @@ const HomePage: NextPage = ({}) => {
             <Input
               placeholder="Desc"
               type="text"
-              full
               error={tForm(errors.desc?.message as string)}
+              full
               {...register('desc')}
             />
             <Input
@@ -115,8 +119,8 @@ const HomePage: NextPage = ({}) => {
             <Input
               placeholder="Logo"
               type="text"
-              full
               error={tForm(errors.logo?.message as string)}
+              full
               {...register('logo')}
             />
             <Input
@@ -126,26 +130,26 @@ const HomePage: NextPage = ({}) => {
               {...register('logoColor')}
             />
           </div>
-          <select
+          <Select
             {...register('style')}
-            className="rounded bg-slate-800 p-2 text-slate-200"
-          >
-            <option value="plastic">Plastic</option>
-            <option value="flat">Flat</option>
-            <option value="flat-square">Flat-Square</option>
-            <option value="for-the-badge">For-The-Badge</option>
-          </select>
-          <button
-            className="flex items-center justify-center gap-2 rounded border border-slate-800 bg-slate-800 p-1 px-6 py-4 text-lg text-slate-200 transition-colors hover:bg-slate-900"
-            type="submit"
-          >
-            Criar
+            options={[
+              { label: 'Plastic', value: 'plastic' },
+              { label: 'Flat', value: 'flat' },
+              { label: 'Flat-Square', value: 'flat-square' },
+              { label: 'For-The-Badge', value: 'for-the-badge' },
+            ]}
+          />
+          <Button>
+            {t('create')}
             <PaperPlaneRight />
-          </button>
+          </Button>
         </form>
 
         {badgeJson && (
-          <pre className="scrollbar-hidden max-h-64 w-full max-w-md overflow-auto rounded-md bg-slate-950 p-4 text-xs">
+          <pre className="scrollbar-hidden max-h-64 w-full  max-w-md overflow-auto rounded-md bg-gray-300 p-4 text-xs dark:bg-slate-950">
+            {badgeUrl}
+            <br />
+            <br />
             {JSON.stringify(badgeJson, null, 2)}
           </pre>
         )}

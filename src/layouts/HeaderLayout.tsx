@@ -31,7 +31,7 @@ const HeaderLayout: NextPage<HeaderLayoutProps> = ({ children }) => {
     <div className={clsx('flex min-h-screen flex-col', currentTheme)}>
       <header className="container flex items-center justify-center gap-6 py-6 text-3xl">
         <Link href="https://github.com/YaGRRusso/template-next" target="_blank">
-          Badge Generator
+          Shields.io Generator
         </Link>
       </header>
       <ErrorBoundary>
